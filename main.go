@@ -1,43 +1,24 @@
 package main
 
 import (
-	"context"
 	"log"
 	"os"
-	"time"
 
-	"github.com/jackc/pgx/v5"
 	"github.com/joho/godotenv"
+	"go-db/app/product"
 )
-
-type Product struct {
-	ID          int
-	Name        string
-	Description string
-	CreatedAt   time.Time
-}
-
-func GetProducts(conn *pgx.Conn) ([]Product, error) {
-	rows, _ := conn.Query(context.Background(), "select * from products")
-	products, err := pgx.CollectRows(rows, pgx.RowToStructByName[Product])
-	if err != nil {
-		return nil, err
-	}
-
-	return products, nil
-}
 
 func main() {
 	// Load env
 	godotenv.Load(".env")
 
 	// Connect to the database
-	conn, err := pgx.Connect(context.Background(), os.Getenv("DB_URL"))
+	conn, err := product.ConnectDb(os.Getenv("DB_URL"))
 	if err != nil {
-		log.Fatal("Unable to connect to the product database")
+		log.Fatal("Unable to connect ot the product database")
 	}
 
-	data, err := GetProducts(conn)
+	data, err := product.GetProducts(conn)
 	if err != nil {
 		log.Fatalf("%s", err)
 	}
